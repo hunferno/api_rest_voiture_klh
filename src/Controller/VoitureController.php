@@ -45,32 +45,49 @@ class VoitureController extends AbstractController
     public function showCar(VoitureRepository $repo, $id): Response
     {
         //APPEL DE LA METHODE DANS LE REPOSITORY
-        $car = $repo->findOneBy(["id" => $id]);
+        $selectedCar = $repo->findOneBy(["id" => $id]);
 
         //RENVOI DU JSON
-        return $this->json($car, 200);
+        return $this->json($selectedCar, 200);
     }
 
     #[Route('/modifier_la_voiture/{id}', name: 'voiture_modifier', methods: ['POST'])]
-    public function modifyCar(VoitureRepository $repo, Request $request, $id, SerializerInterface $serializer): Response
+    public function modifyCar(VoitureRepository $repo, Request $request, EntityManagerInterface $em, $id): Response
     {
         //RECUPERATION DE LA DATA ENVOYÉE
-        $data = $request->getContent();
-
-        //TRANSFORMER LA DATA EN TABLEAU INDICÉ
-        $dataTransformed = $serializer->deserialize($data, Voiture::class, "json");
-
-        //APPEL DE LA METHODE DANS LE REPOSITORY
-        $car = $repo->findOneAndUpdate($id, $dataTransformed);
-
+        $dataFromForm = $request->getContent();
+        //TRANSFORMER LA DATA JSON EN TABLEAU INDICÉ
+        $dataTransformed = json_decode($dataFromForm, true);
+        //SELECTION DE LA VOITURE A MODIFIER
+        $selectedCar = $repo->findOneBy(["id" => $id]);
+        //MESSAGE D'ERREUR SI LA VOITURE N'EXISTE PAS
+        if (!$selectedCar) {
+            return $this->json('Pas de voiture existante pour l\'id :' . $id, 404);
+        }
+        //MISE A JOUR DE LA VOITURE SELECTIONNÉE
+        $updatedCar = $selectedCar
+            ->setMarque($dataTransformed["marque"])
+            ->setVitesse($dataTransformed["vitesse"])
+            ->setCarburant($dataTransformed["carburant"])
+            ->setKilometrage($dataTransformed["kilometrage"])
+            ->setNbrPorte($dataTransformed["nbr_porte"])
+            ->setBoiteDeVitesse($dataTransformed["boite_de_vitesse"])
+            ->setCouleur($dataTransformed["couleur"]);
+        //FAIRE LE FLUSH
+        $em->flush();
         //RENVOI DU JSON
-        return $this->json($car, 200);
+        return $this->json($updatedCar, 201);
     }
 
-    #[Route('/supprimerer_la_voiture/{id}', name: 'voiture_supprimer', methods: ['POST'])]
-    public function deleteCar(VoitureRepository $repo, $id)
+    #[Route('/supprimer_la_voiture/{id}', name: 'voiture_supprimer', methods: ['POST'])]
+    public function deleteCar(VoitureRepository $repo, $id, EntityManagerInterface $em): Response
     {
-        //APPEL DE LA METHODE DANS LE REPOSITORY
-        $repo->findOneAndDelete($id);
+        //SELECTION DE LA VOITURE A SUPPRIMER
+        $selectedCar = $repo->findOneBy(["id" => $id]);
+        //SUPPRESSION DE LA VOITURE
+        $em->remove($selectedCar);
+        $em->flush();
+        //RETOUR D'UN MSG DE CONFIRMATION
+        return $this->json("Véhicule correctement supprimé", 204);
     }
 }

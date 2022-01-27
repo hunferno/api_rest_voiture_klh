@@ -19,35 +19,35 @@ class VoitureRepository extends ServiceEntityRepository
         parent::__construct($registry, Voiture::class);
     }
 
-    public function findOneAndUpdate(int $id, Voiture $data): Voiture
-    {
-        return $this->createQueryBuilder('v')
-            ->update(
-                'SET v.marque=:marque, v.vitesse=:vitesse, v.carburant=:carburant, v.kilometrage=:kilometrage,
-                v.nbr_porte=:nbrPorte, v.boite_de_vitesse=:boite, v.couleur=:couleur'
-            )
-            ->where('v.id=:id')
-            ->setParameters([
-                "marque" => $data->getMarque(),
-                "vitesse" => $data->getVitesse(),
-                "carburant" => $data->getCarburant(),
-                "kilometrage" => $data->getKilometrage(),
-                "nbrPorte" => $data->getNbrPorte(),
-                "boite" => $data->getBoiteDeVitesse(),
-                "couleur" => $data->getCouleur(),
-                "id" => $id
-            ])
-            ->getQuery()
-            ->getResult();
-    }
+    // public function findOneAndUpdate(int $id, Voiture $data): Voiture
+    // {
+    //     return $this->createQueryBuilder('v')
+    //         ->update(
+    //             'SET v.marque=:marque, v.vitesse=:vitesse, v.carburant=:carburant, v.kilometrage=:kilometrage,
+    //             v.nbr_porte=:nbrPorte, v.boite_de_vitesse=:boite, v.couleur=:couleur'
+    //         )
+    //         ->where('v.id=:id')
+    //         ->setParameters([
+    //             "marque" => $data->getMarque(),
+    //             "vitesse" => $data->getVitesse(),
+    //             "carburant" => $data->getCarburant(),
+    //             "kilometrage" => $data->getKilometrage(),
+    //             "nbrPorte" => $data->getNbrPorte(),
+    //             "boite" => $data->getBoiteDeVitesse(),
+    //             "couleur" => $data->getCouleur(),
+    //             "id" => $id
+    //         ])
+    //         ->getQuery()
+    //         ->getResult();
+    // }
 
-    public function findOneAndDelete($id)
-    {
-        $this->createQueryBuilder('v')
-            ->delete()
-            ->where('v.id=:id')
-            ->setParameter('id', $id);
-    }
+    // public function findOneAndDelete($id)
+    // {
+    //     $this->createQueryBuilder('v')
+    //         ->delete()
+    //         ->where('v.id=:id')
+    //         ->setParameter('id', $id);
+    // }
 
     // /**
     //  * @return Voiture[] Returns an array of Voiture objects
