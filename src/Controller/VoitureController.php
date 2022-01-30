@@ -46,7 +46,6 @@ class VoitureController extends AbstractController
     {
         //APPEL DE LA METHODE DANS LE REPOSITORY
         $selectedCar = $repo->findOneBy(["id" => $id]);
-
         //RENVOI DU JSON
         return $this->json($selectedCar, 200);
     }
@@ -72,6 +71,7 @@ class VoitureController extends AbstractController
             ->setKilometrage($dataTransformed["kilometrage"])
             ->setNbrPorte($dataTransformed["nbr_porte"])
             ->setBoiteDeVitesse($dataTransformed["boite_de_vitesse"])
+            ->setImage($dataTransformed["image"])
             ->setCouleur($dataTransformed["couleur"]);
         //FAIRE LE FLUSH
         $em->flush();
@@ -89,5 +89,24 @@ class VoitureController extends AbstractController
         $em->flush();
         //RETOUR D'UN MSG DE CONFIRMATION
         return $this->json("Véhicule correctement supprimé", 204);
+    }
+
+    #[Route("/calcul_du_temps", name: "calcul_temps", methods: ["POST"])]
+    public function timeCalculation(VoitureRepository $repo, Request $request): Response
+    {
+        $data = $request->getContent();
+        $dataTransformed = json_decode($data, true);
+        $id = $dataTransformed["id"];
+        $distance = $dataTransformed["distance"];
+
+        //RECUPERATION DE LA VITESSE
+        $car = $repo->findOneBy(["id" => $id]);
+        $carSpeed = $car->getVitesse();
+
+        //CALCUL DU TEMPS A PARCOURIR EN MN
+        $time = ($distance / $carSpeed) * 60;
+
+        //RENVOI DE LA REPONSE
+        return $this->json(round($time, 2), 200);
     }
 }
